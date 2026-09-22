@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فريق القيادة والتميز - ChromaGrid</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons Bundle -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* ChromaGrid Layout and Custom Masking */
+    .chroma-grid-container {
+      position: relative;
+      width: 100%;
+      min-height: 520px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      background: #08090d;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+
+    .chroma-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 280px));
+      justify-content: center;
+      gap: 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      box-sizing: border-box;
+
+      --x: 50%;
+      --y: 50%;
+      --r: 320px;
+    }
+
+    @media (max-width: 640px) {
+      .chroma-grid {
+        grid-template-columns: 1fr;
+        max-width: 320px;
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    .chroma-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      background: var(--card-gradient, linear-gradient(145deg, #18181b, #000));
+      z-index: 1;
+      cursor: pointer;
+
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+      --spotlight-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .chroma-card:hover {
+      border-color: var(--card-border, #3b82f6);
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 16px 35px rgba(0, 0, 0, 0.6);
+    }
+
+    .chroma-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 2;
+    }
+
+    .chroma-card:hover::before {
+      opacity: 1;
+    }
+
+    .chroma-img-wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 260px;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+
+    .chroma-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+
+    .chroma-card:hover .chroma-img-wrapper img {
+      transform: scale(1.04);
+    }
+
+    .chroma-info {
+      position: relative;
+      z-index: 1;
+      padding: 1.1rem 1.25rem 1.3rem;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      background: rgba(10, 10, 15, 0.75);
+      backdrop-filter: blur(10px);
+    }
+
+    .chroma-info .name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chroma-info .handle {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .chroma-info .role {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      margin-top: 0.2rem;
+    }
+
+    .chroma-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      backdrop-filter: brightness(0.75);
+      -webkit-backdrop-filter: brightness(0.75);
+      background: rgba(0, 0, 0, 0.01);
+
+      mask-image: radial-gradient(
+        circle var(--r) at var(--x) var(--y),
+        transparent 0%,
+        transparent 20%,
+        rgba(0, 0, 0, 0.15) 35%,
+        rgba(0, 0, 0, 0.4) 55%,
+        rgba(0, 0, 0, 0.75) 80%,
+        white 100%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle var(--r) at var(--x) var(--y),
+        transparent 0%,
+        transparent 20%,
+        rgba(0, 0, 0, 0.15) 35%,
+        rgba(0, 0, 0, 0.4) 55%,
+        rgba(0, 0, 0, 0.75) 80%,
+        white 100%
+      );
+    }
+
+    .chroma-fade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      backdrop-filter: brightness(0.75);
+      -webkit-backdrop-filter: brightness(0.75);
+      background: rgba(0, 0, 0, 0.01);
+
+      mask-image: radial-gradient(
+        circle var(--r) at var(--x) var(--y),
+        white 0%,
+        white 20%,
+        rgba(255, 255, 255, 0.8) 40%,
+        rgba(255, 255, 255, 0.4) 70%,
+        transparent 100%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle var(--r) at var(--x) var(--y),
+        white 0%,
+        white 20%,
+        rgba(255, 255, 255, 0.8) 40%,
+        rgba(255, 255, 255, 0.4) 70%,
+        transparent 100%
+      );
+
+      opacity: 1;
+      transition: opacity 0.35s ease;
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .animate-modalPop {
+      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 font-sans p-4 sm:p-8 selection:bg-blue-500 selection:text-white">
+
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header Section -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 sm:p-8 rounded-3xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl shadow-xl">
+      <div class="space-y-2">
+        <div class="flex items-center gap-4">
+          <!-- Company Logo -->
+          <div class="p-2 bg-slate-950/90 rounded-2xl border border-slate-800 shadow-md flex items-center justify-center">
+            <img 
+              src="https://i.postimg.cc/0yNnvrPk/image.png" 
+              alt="شعار الشركة" 
+              class="h-12 w-auto object-contain rounded-xl"
+            />
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+            فريق القيادة والتميز
+          </h1>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-400 max-w-xl leading-relaxed mt-2">
+          مرّر الماوس لاستكشاف الإضاءة التفاعلية، واضغط على كارت أي عضو لعرض ملفه الشخصي والتفاصيل الكاملة.
+        </p>
+      </div>
+
+      <!-- Quick Search Bar -->
+      <div class="relative w-full md:w-72">
+        <i data-lucide="search" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none w-4 h-4"></i>
+        <input 
+          type="text"
+          id="searchInput"
+          placeholder="البحث في الأسماء والمناصب..."
+          class="w-full bg-slate-950/80 border border-slate-800 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/80 transition-colors shadow-inner"
+        />
+      </div>
+    </header>
+
+    <main class="chroma-grid-container" id="gridContainer">
+      <div class="chroma-grid" id="chromaGrid">
+        <!-- Cards will be populated dynamically via JavaScript -->
+      </div>
+      <div class="chroma-overlay" id="chromaOverlay"></div>
+      <div class="chroma-fade" id="chromaFade"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 pt-4">
+      جميع الحقوق محفوظة © <span id="yearSpan"></span>
+    </footer>
+
+  </div>
+
+  <div id="cardModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-modalPop">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full p-6 text-white shadow-2xl relative overflow-hidden">
+      
+      <!-- Close Button -->
+      <button 
+        id="closeModalBtn"
+        class="absolute top-4 left-4 z-10 text-slate-400 hover:text-white p-2 rounded-full bg-slate-800/80 hover:bg-slate-700 transition-colors border border-slate-700/50"
+        title="إغلاق"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Content Grid (Right Column: Image, Left Column: Description) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        
+        <!-- RIGHT SIDE (على اليمين) - Image Container -->
+        <div class="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 p-2.5 flex flex-col justify-center items-center group">
+          <div id="modalBgGlow" class="absolute inset-0 opacity-25 pointer-events-none"></div>
+          <img 
+            id="modalImage" 
+            src="" 
+            alt="" 
+            class="w-full h-80 object-cover rounded-xl shadow-2xl transition-transform duration-500 group-hover:scale-105"
+          />
+          <div class="mt-3 w-full flex items-center justify-between px-2 text-xs text-slate-400">
+            <span id="modalHandle" class="font-mono text-blue-400 font-semibold" dir="ltr"></span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+              عضو موثق
+            </span>
+          </div>
+        </div>
+
+        <!-- LEFT SIDE (على الشمال) - Description & Information -->
+        <div class="flex flex-col justify-between space-y-4 py-1">
+          <div class="space-y-3">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700">
+              <i data-lucide="building" class="w-3.5 h-3.5 text-blue-400"></i>
+              فريق القيادة والإدارة
+            </div>
+
+            <h2 id="modalTitle" class="text-2xl font-bold text-white tracking-wide"></h2>
+
+            <p id="modalSubtitle" class="text-sm font-semibold text-emerald-400"></p>
+
+            <div class="w-12 h-0.5 bg-blue-500/50 rounded-full my-2"></div>
+
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">عن المسؤول والمهام:</h4>
+              <p id="modalDescription" class="text-slate-300 text-sm leading-relaxed bg-slate-950/70 p-4 rounded-xl border border-slate-800/80 shadow-inner">
+              </p>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button
+              id="closeModalActionBtn"
+              class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors border border-slate-700 text-center"
+            >
+              إغلاق النافذة
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Data List
+    const teamMembers = [
+      {
+        id: 1,
+        image: "https://i.postimg.cc/Vv7Z8trd/image.png",
+        title: "عصام عبد العظيم",
+        subtitle: "Co-Founder / شريك مؤسس",
+        handle: "@essam_abdelazim",
+        borderColor: "#EF4444",
+        gradient: "linear-gradient(195deg, #EF4444, #000)",
+        description: "الشريك المؤسس للشركة، يمتلك خبرة استراتيجية واسعة في إدارة وتطوير الأعمال، وقيادة التوسع في السوق وتنمية الاستثمارات وضمان استدامة التميز المؤسسي."
+      },
+      {
+        id: 2,
+        image: "https://i.postimg.cc/SscpkgkY/image.png",
+        title: "م. عادل فاروق فيصل",
+        subtitle: "المدير العام لشركة نيو اير",
+        handle: "@eng_adel_farouk",
+        borderColor: "#8B5CF6",
+        gradient: "linear-gradient(225deg, #8B5CF6, #000)",
+        description: "المدير العام لشركة نيو اير (New Air)، يتولى الإشراف الإداري والتنفيذي العام على كافة القطاعات التشغيلية والفنية بالشركة، مع التركيز على أعلى معايير الجودة والابتكار."
+      },
+      {
+        id: 3,
+        image: "https://i.postimg.cc/x1987bGs/image.png",
+        title: "م. عمرو",
+        subtitle: "مدير المبيعات (Sales Director)",
+        handle: "@eng_amr",
+        borderColor: "#10B981",
+        gradient: "linear-gradient(180deg, #10B981, #000)",
+        description: "مدير قطاع المبيعات والتسويق، مسئول عن قيادة استراتيجيات المبيعات، وبناء العلاقات الاستراتيجية المستدامة مع العملاء وتحقيق مستهدفات النمو والتوسع للشركة."
+      },
+      {
+        id: 4,
+        image: "https://i.postimg.cc/PJBZYf0M/image.png",
+        title: "عبدالرحمن احمد الطيب",
+        subtitle: "Frontend & IT / مسؤول الموقع",
+        handle: "@abdelrahman_altayeb",
+        borderColor: "#3B82F6",
+        gradient: "linear-gradient(145deg, #3B82F6, #000)",
+        description: "مهندس واجهات المستخدم وتقنية المعلومات، المسئول الأول عن تطوير وبناء وتأمين الموقع الإلكتروني، وابتكار واجهات تفاعلية ذكية وسريعة تمنح المستخدم أفضل تجربة تصفح."
+      }
+    ];
+
+    const chromaGrid = document.getElementById('chromaGrid');
+    const gridContainer = document.getElementById('gridContainer');
+    const chromaFade = document.getElementById('chromaFade');
+    const searchInput = document.getElementById('searchInput');
+    const yearSpan = document.getElementById('yearSpan');
+
+    const cardModal = document.getElementById('cardModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const closeModalActionBtn = document.getElementById('closeModalActionBtn');
+    const modalImage = document.getElementById('modalImage');
+    const modalBgGlow = document.getElementById('modalBgGlow');
+    const modalHandle = document.getElementById('modalHandle');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSubtitle = document.getElementById('modalSubtitle');
+    const modalDescription = document.getElementById('modalDescription');
+
+    // Set Footer Year
+    yearSpan.textContent = new Date().getFullYear();
+
+    function renderCards(items) {
+      chromaGrid.innerHTML = '';
+
+      if (items.length === 0) {
+        chromaGrid.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <p class="text-slate-400 text-sm">لا توجد نتائج مطابقة لبحثك</p>
+          </div>
+        `;
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement('article');
+        card.className = 'chroma-card group';
+        card.style.setProperty('--card-border', item.borderColor);
+        card.style.setProperty('--card-gradient', item.gradient);
+
+        card.innerHTML = `
+          <div class="chroma-img-wrapper">
+            <img src="${item.image}" alt="${item.title}" loading="lazy" />
+          </div>
+          <footer class="chroma-info">
+            <h3 class="name">
+              <span>${item.title}</span>
+              <i data-lucide="info" class="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition-colors"></i>
+            </h3>
+            <span class="handle" dir="ltr">${item.handle}</span>
+            <p class="role">${item.subtitle}</p>
+          </footer>
+        `;
+
+        // Card Hover Spotting
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+        });
+
+        // Click to Open Modal
+        card.addEventListener('click', () => openModal(item));
+
+        chromaGrid.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    gridContainer.addEventListener('pointermove', (e) => {
+      const rect = gridContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      gridContainer.style.setProperty('--x', `${x}px`);
+      gridContainer.style.setProperty('--y', `${y}px`);
+
+      if (chromaFade) {
+        chromaFade.style.opacity = '0';
+      }
+    });
+
+    gridContainer.addEventListener('pointerleave', () => {
+      if (chromaFade) {
+        chromaFade.style.opacity = '1';
+      }
+    });
+
+    function openModal(item) {
+      modalImage.src = item.image;
+      modalImage.alt = item.title;
+      modalBgGlow.style.background = item.gradient;
+      modalHandle.textContent = item.handle;
+      modalTitle.textContent = item.title;
+      modalSubtitle.textContent = item.subtitle;
+      modalDescription.textContent = item.description;
+
+      cardModal.classList.remove('hidden');
+      cardModal.classList.add('flex');
+    }
+
+    function closeModal() {
+      cardModal.classList.add('hidden');
+      cardModal.classList.remove('flex');
+    }
+
+    closeModalBtn.addEventListener('click', closeModal);
+    closeModalActionBtn.addEventListener('click', closeModal);
+
+    cardModal.addEventListener('click', (e) => {
+      if (e.target === cardModal) {
+        closeModal();
+      }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const filtered = teamMembers.filter(item =>
+        item.title.toLowerCase().includes(query) ||
+        item.subtitle.toLowerCase().includes(query)
+      );
+      renderCards(filtered);
+    });
+
+    // Initial Render
+    renderCards(teamMembers);
+    lucide.createIcons();
+  </script>
+</body>
+</html>
