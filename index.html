@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>فريق القيادة والتميز - ChromaGrid</title>
   
+  <!-- ✅ Preconnect لخادم الصور (يبدأ الاتصال مبكراً) -->
+  <link rel="preconnect" href="https://i.postimg.cc" crossorigin>
+  <link rel="dns-prefetch" href="https://i.postimg.cc">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com">
+  <link rel="preconnect" href="https://unpkg.com">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -83,7 +89,7 @@
       transition: opacity 0.4s ease; z-index: 2;
     }
 
-    /* ===== Image Wrapper - Fixed height with contain ===== */
+    /* ===== Image Wrapper ===== */
     .chroma-img-wrapper {
       position: relative; z-index: 1; width: 100%;
       height: 280px;
@@ -96,15 +102,37 @@
     @media (min-width: 640px) { .chroma-img-wrapper { height: 320px; padding: 12px; } }
     @media (min-width: 1024px) { .chroma-img-wrapper { height: 340px; } }
 
-    /* ===== KEY FIX: object-fit contain to show FULL image ===== */
+    /* ✅ Shimmer placeholder أثناء التحميل */
+    .chroma-img-wrapper::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      animation: shimmer 1.6s infinite;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .chroma-img-wrapper.is-loading::after { opacity: 1; }
+    .chroma-img-wrapper.is-loaded::after { opacity: 0; animation: none; }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
     .chroma-img-wrapper img {
       width: 100%; height: 100%;
-      object-fit: contain;   /* ← الصورة تظهر كاملة بدون قص */
+      object-fit: contain;
       object-position: center;
       border-radius: 10px; display: block;
-      transition: transform 0.5s ease;
+      transition: transform 0.5s ease, opacity 0.4s ease;
       background: rgba(0, 0, 0, 0.2);
+      opacity: 0; /* ✅ يبدأ شفاف */
+      position: relative;
+      z-index: 1;
     }
+    .chroma-img-wrapper img.loaded { opacity: 1; }
     @media (min-width: 640px) {
       .chroma-img-wrapper img { border-radius: 14px; }
     }
@@ -249,7 +277,6 @@
       }
     }
 
-    /* ===== Modal Image - shows FULL image ===== */
     .modal-image-wrap {
       width: 100%;
       height: 320px;
@@ -258,7 +285,20 @@
       border-radius: 12px;
       overflow: hidden;
       padding: 4px;
+      position: relative;
     }
+    .modal-image-wrap::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      animation: shimmer 1.6s infinite;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .modal-image-wrap.is-loading::after { opacity: 1; }
+    .modal-image-wrap.is-loaded::after { opacity: 0; animation: none; }
+
     @media (max-width: 640px) {
       .modal-image-wrap { height: 260px; }
     }
@@ -269,12 +309,16 @@
     .modal-image {
       width: 100%;
       height: 100%;
-      object-fit: contain;  /* ← الصورة كاملة في المودال */
+      object-fit: contain;
       object-position: center;
       border-radius: 10px;
       display: block;
-      transition: transform 0.5s ease;
+      transition: transform 0.5s ease, opacity 0.3s ease;
+      opacity: 0;
+      position: relative;
+      z-index: 1;
     }
+    .modal-image.loaded { opacity: 1; }
 
     .modal-contact-grid {
       display: grid; grid-template-columns: 1fr;
@@ -375,6 +419,8 @@
               src="https://i.postimg.cc/0yNnvrPk/image.png" 
               alt="شعار الشركة" 
               class="header-logo object-contain rounded-lg sm:rounded-xl"
+              width="120" height="48"
+              fetchpriority="high"
               onerror="this.style.display='none'"
             />
           </div>
@@ -427,13 +473,14 @@
         <div class="relative rounded-xl sm:rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 p-2 sm:p-2.5 flex flex-col justify-center items-center group">
           <div id="modalBgGlow" class="absolute inset-0 opacity-25 pointer-events-none"></div>
           
-          <!-- Modal Image Wrapper - shows FULL image -->
-          <div class="modal-image-wrap relative z-10">
+          <div class="modal-image-wrap relative z-10" id="modalImageWrap">
             <img 
               id="modalImage" 
               src="" 
               alt="" 
               class="modal-image"
+              width="400" height="400"
+              decoding="async"
             />
           </div>
 
@@ -633,6 +680,7 @@
     const closeModalBtn = document.getElementById('closeModalBtn');
     const closeModalActionBtn = document.getElementById('closeModalActionBtn');
     const modalImage = document.getElementById('modalImage');
+    const modalImageWrap = document.getElementById('modalImageWrap');
     const modalBgGlow = document.getElementById('modalBgGlow');
     const modalHandle = document.getElementById('modalHandle');
     const modalTitle = document.getElementById('modalTitle');
@@ -645,14 +693,41 @@
 
     yearSpan.textContent = new Date().getFullYear();
 
-    // ===== Safe image loader =====
-    function safeImgTag(src, alt, name, color, extraClass = '') {
+    // ✅ Preload cache للصور لتسريع المودال
+    const imageCache = new Map();
+
+    function preloadImage(url) {
+      if (imageCache.has(url)) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+      imageCache.set(url, img);
+    }
+
+    // ===== ✅ Safe image tag with priority + dimensions =====
+    function safeImgTag(src, alt, name, color, index = 0) {
       const placeholder = createPlaceholder(name, color);
       const safePlaceholder = placeholder.replace(/"/g, '&quot;');
       const safeSrc = src.replace(/"/g, '&quot;');
       const safeAlt = alt.replace(/"/g, '&quot;');
-      return `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" class="${extraClass}"
-        onerror="this.onerror=null; this.src='${safePlaceholder}';" />`;
+      
+      // ✅ أول 4 صور: eager + high priority | الباقي: lazy
+      const isPriority = index < 4;
+      const loading = isPriority ? 'eager' : 'lazy';
+      const priority = isPriority ? 'high' : 'auto';
+      
+      return `<img 
+        src="${safeSrc}" 
+        alt="${safeAlt}" 
+        width="400" 
+        height="400"
+        loading="${loading}"
+        fetchpriority="${priority}"
+        decoding="async"
+        class="card-img"
+        data-src="${safeSrc}"
+        onerror="this.onerror=null; this.src='${safePlaceholder}';"
+      />`;
     }
 
     function renderCards(items) {
@@ -669,16 +744,16 @@
         return;
       }
 
-      items.forEach(item => {
+      items.forEach((item, index) => {
         const card = document.createElement('article');
         card.className = 'chroma-card group';
         card.style.setProperty('--card-border', item.borderColor);
         card.style.setProperty('--card-gradient', item.gradient);
 
-        const imgHTML = safeImgTag(item.image, item.title, item.title, item.borderColor);
+        const imgHTML = safeImgTag(item.image, item.title, item.title, item.borderColor, index);
 
         card.innerHTML = `
-          <div class="chroma-img-wrapper">
+          <div class="chroma-img-wrapper is-loading">
             ${imgHTML}
           </div>
           <footer class="chroma-info">
@@ -701,6 +776,39 @@
             </div>
           </footer>
         `;
+
+        // ✅ ربط تحميل الصورة بـ CSS classes (fade-in + إخفاء shimmer)
+        const wrapper = card.querySelector('.chroma-img-wrapper');
+        const img = card.querySelector('img.card-img');
+        
+        if (img) {
+          const onLoad = () => {
+            wrapper.classList.remove('is-loading');
+            wrapper.classList.add('is-loaded');
+            img.classList.add('loaded');
+          };
+          
+          // لو الصورة محملة مسبقاً (cache)
+          if (img.complete && img.naturalWidth > 0) {
+            onLoad();
+          } else {
+            img.addEventListener('load', onLoad, { once: true });
+            img.addEventListener('error', () => {
+              wrapper.classList.remove('is-loading');
+              wrapper.classList.add('is-loaded');
+              img.classList.add('loaded');
+            }, { once: true });
+          }
+        }
+
+        // ✅ Preload للصور الأخرى في الخلفية بعد ظهور أول 4
+        if (index >= 4 && index < 8) {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => preloadImage(item.image), { timeout: 2000 });
+          } else {
+            setTimeout(() => preloadImage(item.image), 100);
+          }
+        }
 
         card.addEventListener('mousemove', (e) => {
           const rect = card.getBoundingClientRect();
@@ -739,12 +847,38 @@
     }
 
     function openModal(item) {
-      modalImage.src = item.image;
-      modalImage.alt = item.title;
+      // ✅ ابدأ shimmer
+      modalImageWrap.classList.remove('is-loaded');
+      modalImageWrap.classList.add('is-loading');
+      modalImage.classList.remove('loaded');
+
+      // ✅ لو الصورة في الـ cache، اعرض فوراً
+      const cached = imageCache.get(item.image);
+      const finalSrc = cached ? cached.src : item.image;
+
+      modalImage.onload = function() {
+        modalImageWrap.classList.remove('is-loading');
+        modalImageWrap.classList.add('is-loaded');
+        modalImage.classList.add('loaded');
+      };
+      
       modalImage.onerror = function() {
         this.onerror = null;
         this.src = createPlaceholder(item.title, item.borderColor);
+        modalImageWrap.classList.remove('is-loading');
+        modalImageWrap.classList.add('is-loaded');
+        modalImage.classList.add('loaded');
       };
+
+      modalImage.src = finalSrc;
+      modalImage.alt = item.title;
+
+      // لو الصورة محملة مسبقاً
+      if (modalImage.complete && modalImage.naturalWidth > 0) {
+        modalImageWrap.classList.remove('is-loading');
+        modalImageWrap.classList.add('is-loaded');
+        modalImage.classList.add('loaded');
+      }
 
       modalBgGlow.style.background = item.gradient;
       modalHandle.textContent = item.handle;
@@ -782,17 +916,21 @@
       }
     });
 
+    // ✅ Debounce للبحث (يمنع re-render مع كل حرف)
+    let searchTimeout;
     searchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase().trim();
-      const filtered = teamMembers.filter(item =>
-        item.title.toLowerCase().includes(query) ||
-        item.subtitle.toLowerCase().includes(query)
-      );
-      renderCards(filtered);
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const query = e.target.value.toLowerCase().trim();
+        const filtered = teamMembers.filter(item =>
+          item.title.toLowerCase().includes(query) ||
+          item.subtitle.toLowerCase().includes(query)
+        );
+        renderCards(filtered);
+      }, 250);
     });
 
     renderCards(teamMembers);
-    lucide.createIcons();
   </script>
 </body>
 </html>
