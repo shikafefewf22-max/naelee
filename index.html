@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>فريق القيادة والتميز - ChromaGrid</title>
+  <title>فريق عمل نيلي - ChromaGrid</title>
   
-  <!-- ✅ Preconnect لخادم الصور (يبدأ الاتصال مبكراً) -->
+  <!-- ✅ Preconnect لخادم الصور -->
   <link rel="preconnect" href="https://i.postimg.cc" crossorigin>
   <link rel="dns-prefetch" href="https://i.postimg.cc">
   <link rel="preconnect" href="https://cdn.tailwindcss.com">
@@ -89,7 +89,6 @@
       transition: opacity 0.4s ease; z-index: 2;
     }
 
-    /* ===== Image Wrapper ===== */
     .chroma-img-wrapper {
       position: relative; z-index: 1; width: 100%;
       height: 280px;
@@ -102,7 +101,6 @@
     @media (min-width: 640px) { .chroma-img-wrapper { height: 320px; padding: 12px; } }
     @media (min-width: 1024px) { .chroma-img-wrapper { height: 340px; } }
 
-    /* ✅ Shimmer placeholder أثناء التحميل */
     .chroma-img-wrapper::after {
       content: '';
       position: absolute; inset: 0;
@@ -128,7 +126,7 @@
       border-radius: 10px; display: block;
       transition: transform 0.5s ease, opacity 0.4s ease;
       background: rgba(0, 0, 0, 0.2);
-      opacity: 0; /* ✅ يبدأ شفاف */
+      opacity: 0;
       position: relative;
       z-index: 1;
     }
@@ -417,7 +415,7 @@
           <div class="p-1.5 sm:p-2 bg-slate-950/90 rounded-xl sm:rounded-2xl border border-slate-800 shadow-md flex items-center justify-center flex-shrink-0">
             <img 
               src="https://i.postimg.cc/0yNnvrPk/image.png" 
-              alt="شعار الشركة" 
+              alt="شعار شركة نيلي" 
               class="header-logo object-contain rounded-lg sm:rounded-xl"
               width="120" height="48"
               fetchpriority="high"
@@ -425,11 +423,11 @@
             />
           </div>
           <h1 class="header-title font-extrabold bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent break-words-safe">
-            فريق القيادة والتميز
+            فريق عمل نيلي
           </h1>
         </div>
         <p class="text-[11px] sm:text-xs md:text-sm text-slate-400 max-w-xl leading-relaxed mt-1 sm:mt-2 break-words-safe">
-          مرّر الماوس لاستكشاف الإضاءة التفاعلية، واضغط على كارت أي عضو لعرض ملفه الشخصي والتفاصيل الكاملة.
+          مرّر الماوس لاستكشاف الإضاءة التفاعلية، واضغط على بطاقة أي عضو لعرض ملفه الشخصي والتفاصيل الكاملة.
         </p>
       </div>
 
@@ -438,7 +436,7 @@
         <input 
           type="text"
           id="searchInput"
-          placeholder="البحث في الأسماء والمناصب..."
+          placeholder="ابحث في الأسماء والمناصب..."
           class="w-full bg-slate-950/80 border border-slate-800 rounded-xl sm:rounded-2xl pr-10 pl-4 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/80 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-inner"
         />
       </div>
@@ -451,7 +449,7 @@
     </main>
 
     <footer class="text-center text-[10px] sm:text-xs text-slate-500 pt-3 sm:pt-4 pb-2">
-      جميع الحقوق محفوظة © <span id="yearSpan"></span>
+      جميع الحقوق محفوظة © <span id="yearSpan"></span> - شركة نيلي
     </footer>
 
   </div>
@@ -488,7 +486,7 @@
             <span id="modalHandle" class="font-mono text-blue-400 font-semibold text-[10px] sm:text-xs truncate" dir="ltr"></span>
             <span class="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-[11px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20 flex-shrink-0">
               <i data-lucide="shield-check" class="w-3 h-3 sm:w-3.5 sm:h-3.5"></i>
-              عضو موثق
+              عضو موثّق
             </span>
           </div>
         </div>
@@ -497,7 +495,7 @@
           <div class="space-y-2 sm:space-y-3">
             <div class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-[10px] sm:text-xs font-semibold border border-slate-700">
               <i data-lucide="building" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-400"></i>
-              فريق القيادة والإدارة
+              فريق عمل نيلي
             </div>
 
             <h2 id="modalTitle" class="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-wide break-words-safe"></h2>
@@ -552,19 +550,21 @@
   <script>
     // ===== Placeholder avatar SVG (data URI) for failed images =====
     function createPlaceholder(name, color) {
-      const initials = name.trim().split(' ').slice(0, 2).map(w => w[0]).join('');
+      const safeName = (name && typeof name === 'string') ? name : 'عضو';
+      const safeColor = color || '#3B82F6';
+      const initials = safeName.trim().split(' ').slice(0, 2).map(w => w[0] || '').join('');
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
           <defs>
             <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:${color};stop-opacity:1" />
+              <stop offset="0%" style="stop-color:${safeColor};stop-opacity:1" />
               <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
             </linearGradient>
           </defs>
           <rect width="400" height="400" fill="url(#g)"/>
           <circle cx="200" cy="160" r="70" fill="rgba(255,255,255,0.15)"/>
           <text x="200" y="185" font-family="system-ui, sans-serif" font-size="60" font-weight="bold" fill="white" text-anchor="middle">${initials}</text>
-          <text x="200" y="300" font-family="system-ui, sans-serif" font-size="22" font-weight="600" fill="rgba(255,255,255,0.8)" text-anchor="middle">${name}</text>
+          <text x="200" y="300" font-family="system-ui, sans-serif" font-size="22" font-weight="600" fill="rgba(255,255,255,0.8)" text-anchor="middle">${safeName}</text>
         </svg>
       `;
       return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
@@ -573,91 +573,19 @@
     // ===== Team Data =====
     const teamMembers = [
       {
-        id: 1,
-        image: "https://i.postimg.cc/Vv7Z8trd/image.png",
-        title: "م. عصام عبد العظيم كامل",
-        subtitle: "Co-Founder / شريك مؤسس",
-        handle: "@essam_abdelazim",
-        borderColor: "#EF4444",
-        gradient: "linear-gradient(195deg, #EF4444, #000)",
-        phone: "+20 12 23218448",
-        email: "ceo@naelee.tech",
-        description: "النشاط انظمت تكيف الهواء لكفت التطبقات، يمتلك خبرة استراتيجية واسعة في إدارة وتطوير الأعمال، وقيادة التوسع في السوق وتنمية الاستثمارات وضمان استدامة التميز المؤسسي."
-      },
+  id: 1,
+  image: "https://i.postimg.cc/Vv7Z8trd/image.png",
+  title: "م. عصام عبد العظيم كامل",
+  subtitle: "Co-Founder / شريك مؤسس",
+  handle: "@essam_abdelazim",
+  borderColor: "#EF4444",
+  gradient: "linear-gradient(195deg, #EF4444, #000)",
+  phone: "+20 12 23218448",
+  email: "ceo@naelee.tech",
+  description: "النشاط انظمت تكيف الهواء لكفت التطبقات، يمتلك خبرة استراتيجية واسعة في إدارة وتطوير الأعمال، وقيادة التوسع في السوق وتنمية الاستثمارات وضمان استدامة التميز المؤسسي."
+},
       {
         id: 2,
-        image: "https://i.postimg.cc/SN53xjfw/image.png",
-        title: "م. عادل فيصل",
-        subtitle: "المدير العام لشركة نيو اير",
-        handle: "@eng_adel_farouk",
-        borderColor: "#8B5CF6",
-        gradient: "linear-gradient(225deg, #8B5CF6, #000)",
-        phone: "+20 10 03433312",
-        email: "info@naelee.tech",
-        description: "المدير العام لشركة نيو اير أيجبت، يتولى الإشراف الإداري والتنفيذي العام على كافة القطاعات التشغيلية والفنية، مع التركيز على أعلى معايير الجودة والابتكار والتنمية والتدريب المستدام."
-      },
-      {
-        id: 3,
-        image: "https://i.postimg.cc/x1987bGs/image.png",
-        title: "م. عمرو الصافي",
-        subtitle: "مدير المبيعات (Sales Director)",
-        handle: "@eng_amr",
-        borderColor: "#10B981",
-        gradient: "linear-gradient(180deg, #10B981, #000)",
-        phone: "+20 11 14898319",
-        email: "sales@naelee.tech",
-        description: "مدير قطاع المبيعات والتسويق، مسئول عن قيادة استراتيجيات المبيعات، وبناء العلاقات الاستراتيجية المستدامة مع العملاء وتحقيق مستهدفات النمو والتوسع للشركة."
-      },
-      {
-        id: 4,
-        image: "https://i.postimg.cc/PJBZYf0M/image.png",
-        title: "عبدالرحمن أحمد الطيب",
-        subtitle: "Frontend & IT / مسؤول الموقع",
-        handle: "@abdelrahman_altayeb",
-        borderColor: "#3B82F6",
-        gradient: "linear-gradient(145deg, #3B82F6, #000)",
-        phone: "+20 1120362974",
-        email: "abdelrahman@newair-eg.com",
-        description: "مهندس واجهات المستخدم وتقنية المعلومات، المسئول الأول عن تطوير وبناء وتأمين الموقع الإلكتروني، وابتكار واجهات تفاعلية ذكية وسريعة تمنح المستخدم أفضل تجربة تصفح."
-      },
-      {
-        id: 5,
-        image: "https://i.postimg.cc/bY7d85Pg/image.png",
-        title: " م.وسام عصام ",
-        subtitle: "عضو فريق القيادة",
-        handle: "@wessam_essam",
-        borderColor: "#F59E0B",
-        gradient: "linear-gradient(165deg, #F59E0B, #000)",
-        phone: "+20 10 11526604",
-        email: "sales@naelee.tech",
-        description: "عضو بارز في فريق القيادة والإدارة، يساهم في دعم وتطوير المبادرات الاستراتيجية وتطوير الأعمال مع ضمان تحقيق أعلى مستويات الكفاءة والجودة."
-      },
-      {
-        id: 6,
-        image: "https://i.postimg.cc/zfxrxx8d/image.png",
-        title: "د. محمد السباعي",
-        subtitle: "شركة Sismatics",
-        handle: "@dr_mohamed_elsebaey",
-        borderColor: "#06B6D4",
-        gradient: "linear-gradient(200deg, #06B6D4, #000)",
-        phone: "+20 10 00214131",
-        email: "tech@naelee.tech",
-        description: "دكتور ومتخصص في مجال الأنظمة الذكية والأتمتة، يقود شركة Sismatics المتخصصة في الحلول التقنية المتقدمة وأنظمة التحكم الذكي، مع خبرة واسعة في تطوير البنية التحتية التقنية للمشروعات الكبرى."
-      },
-      {
-        id: 7,
-        image: "https://i.postimg.cc/BnQs2WGt/image.png",
-        title: "م. عبد الحميد فاروق",
-        subtitle: "تحكم وأتمتة وباور كهرباء",
-        handle: "@eng_abdelhamid_farouk",
-        borderColor: "#F97316",
-        gradient: "linear-gradient(170deg, #F97316, #000)",
-        phone: "+20 11 44404610",
-        email: "tech@naelee.tech",
-        description: "مهندس متخصص في أنظمة التحكم والأتمتة والطاقة الكهربائية، يتولى الإشراف على تصميم وتنفيذ أنظمة التحكم الذكي ومشروعات الباور الكهربائي، مع التركيز على أعلى معايير السلامة والكفاءة التشغيلية."
-      },
-      {
-        id: 8,
         image: "https://i.postimg.cc/sDKCjnG8/image.png",
         title: "م. محمد صلاح",
         subtitle: "مدير عام التصميمات والمشروعات الكبرى والتطوير",
@@ -667,32 +595,103 @@
         phone: "+20 1008050322",
         email: "mohamed.salah@newair-eg.com",
         description: "مدير عام التصميمات والمشروعات الكبرى والتطوير، يقود فريق التصميم الهندسي والإشراف على تنفيذ المشروعات الكبرى، مع التركيز على الابتكار والتطوير المستمر ورفع كفاءة الأداء المؤسسي."
-      }  
+      },
+      {
+        id: 3,
+        image: "https://i.postimg.cc/SN53xjfw/image.png",
+        title: "م. عادل فيصل",
+        subtitle: "المدير العام لشركة نيو إير",
+        handle: "@eng_adel_faisal",
+        borderColor: "#8B5CF6",
+        gradient: "linear-gradient(225deg, #8B5CF6, #000)",
+        phone: "+20 10 03433312",
+        email: "info@naelee.tech",
+        description: "المدير العام لشركة نيو إير إيجيبت، يتولى الإشراف الإداري والتنفيذي العام على كافة القطاعات التشغيلية والفنية، مع التركيز على أعلى معايير الجودة والابتكار والتنمية والتدريب المستدام."
+      },
+      {
+        id: 4,
+        image: "https://i.postimg.cc/PJBZYf0M/image.png",
+        title: "م. عبد الرحمن أحمد الطيب",
+        subtitle: "مطوّر واجهات أمامية وتقنية المعلومات",
+        handle: "@abdelrahman_altayeb",
+        borderColor: "#3B82F6",
+        gradient: "linear-gradient(145deg, #3B82F6, #000)",
+        phone: "+20 1120362974",
+        email: "abdelrahman@newair-eg.com",
+        description: "مهندس واجهات المستخدم وتقنية المعلومات، المسؤول الأول عن تطوير وبناء وتأمين الموقع الإلكتروني، وابتكار واجهات تفاعلية ذكية وسريعة تمنح المستخدم أفضل تجربة تصفح."
+      },
+      {
+        id: 5,
+        image: "https://i.postimg.cc/bY7d85Pg/image.png",
+        title: "م. وسام عصام",
+        subtitle: "عضو فريق العمل",
+        handle: "@wessam_essam",
+        borderColor: "#F59E0B",
+        gradient: "linear-gradient(165deg, #F59E0B, #000)",
+        phone: "+20 10 11526604",
+        email: "sales@naelee.tech",
+        description: "عضو بارز في فريق العمل، يساهم في دعم وتطوير المبادرات الاستراتيجية وتطوير الأعمال، مع ضمان تحقيق أعلى مستويات الكفاءة والجودة."
+      },
+      {
+        id: 6,
+        image: "https://i.postimg.cc/zfxrxx8d/image.png",
+        title: "د. محمد السباعي",
+        subtitle: "شركة سيزماتكس (Sismatics)",
+        handle: "@dr_mohamed_elsebaey",
+        borderColor: "#06B6D4",
+        gradient: "linear-gradient(200deg, #06B6D4, #000)",
+        phone: "+20 10 00214131",
+        email: "tech@naelee.tech",
+        description: "دكتور ومتخصص في مجال الأنظمة الذكية والأتمتة، يقود شركة سيزماتكس المتخصصة في الحلول التقنية المتقدمة وأنظمة التحكم الذكي، مع خبرة واسعة في تطوير البنية التحتية التقنية للمشروعات الكبرى."
+      },
+      {
+        id: 7,
+        image: "https://i.postimg.cc/x1987bGs/image.png",
+        title: "م. عمرو الصافي",
+        subtitle: "مدير المبيعات (Sales Director)",
+        handle: "@eng_amr",
+        borderColor: "#10B981",
+        gradient: "linear-gradient(180deg, #10B981, #000)",
+        phone: "+20 11 14898319",
+        email: "sales@naelee.tech",
+        description: "مدير قطاع المبيعات والتسويق، مسؤول عن قيادة استراتيجيات المبيعات، وبناء العلاقات الاستراتيجية المستدامة مع العملاء، وتحقيق مستهدفات النمو والتوسع للشركة."
+      },
+      {
+        id: 8,
+        image: "https://i.postimg.cc/BnQs2WGt/image.png",
+        title: "م. عبد الحميد فاروق",
+        subtitle: "أنظمة التحكم والأتمتة والطاقة الكهربائية",
+        handle: "@eng_abdelhamid_farouk",
+        borderColor: "#F97316",
+        gradient: "linear-gradient(170deg, #F97316, #000)",
+        phone: "+20 11 44404610",
+        email: "tech@naelee.tech",
+        description: "مهندس متخصص في أنظمة التحكم والأتمتة والطاقة الكهربائية، يتولى الإشراف على تصميم وتنفيذ أنظمة التحكم الذكي ومشروعات الطاقة الكهربائية، مع التركيز على أعلى معايير السلامة والكفاءة التشغيلية."
+      },
       {
         id: 9,
         image: "https://i.postimg.cc/sDKCjnG8/image.png",
-        title: "م. عبدالحميد سلامه",
-        subtitle: "   tech  ",
-        handle: "@eng_abd_aalhmid_slamh",
+        title: "م. عبد الحميد سلامة",
+        subtitle: "تقني (Tech)",
+        handle: "@eng_abd_alhamid_salama",
         borderColor: "#EC4899",
         gradient: "linear-gradient(210deg, #EC4899, #000)",
         phone: "+20 107 890 1234",
         email: "tech@naelee.tech",
-        description: "مدير عام التصميمات والمشروعات الكبرى والتطوير، يقود فريق التصميم الهندسي والإشراف على تنفيذ المشروعات الكبرى، مع التركيز على الابتكار والتطوير المستمر ورفع كفاءة الأداء المؤسسي."
-      }
-
-    {
+        description: "مهندس تقني متخصص، يساهم في تنفيذ المشروعات التقنية والإشراف على الجوانب الفنية، مع التركيز على الابتكار والتطوير المستمر ورفع كفاءة الأداء التشغيلي."
+      },
+      {
         id: 10,
         image: "https://i.postimg.cc/d0zS3ZY8/image.png",
-        title: " Sismatics ",
-        subtitle: "شركة Sismatics",
+        title: "شركة سيزماتكس",
+        subtitle: "شريك تقني (Sismatics)",
         handle: "@Sismatics",
         borderColor: "#06B6D4",
         gradient: "linear-gradient(200deg, #06B6D4, #000)",
         phone: "+20 10 00214131",
         email: "tech@naelee.tech",
-        description: "دكتور ومتخصص في مجال الأنظمة الذكية والأتمتة، يقود شركة Sismatics المتخصصة في الحلول التقنية المتقدمة وأنظمة التحكم الذكي، مع خبرة واسعة في تطوير البنية التحتية التقنية للمشروعات الكبرى."
-      },
+        description: "شركة سيزماتكس المتخصصة في الأنظمة الذكية والأتمتة والحلول التقنية المتقدمة، وأنظمة التحكم الذكي، مع خبرة واسعة في تطوير البنية التحتية التقنية للمشروعات الكبرى."
+      }
     ];
 
     const chromaGrid = document.getElementById('chromaGrid');
@@ -722,7 +721,7 @@
     const imageCache = new Map();
 
     function preloadImage(url) {
-      if (imageCache.has(url)) return;
+      if (!url || imageCache.has(url)) return;
       const img = new Image();
       img.decoding = 'async';
       img.src = url;
@@ -736,7 +735,6 @@
       const safeSrc = src.replace(/"/g, '&quot;');
       const safeAlt = alt.replace(/"/g, '&quot;');
       
-      // ✅ أول 4 صور: eager + high priority | الباقي: lazy
       const isPriority = index < 4;
       const loading = isPriority ? 'eager' : 'lazy';
       const priority = isPriority ? 'high' : 'auto';
@@ -802,7 +800,6 @@
           </footer>
         `;
 
-        // ✅ ربط تحميل الصورة بـ CSS classes (fade-in + إخفاء shimmer)
         const wrapper = card.querySelector('.chroma-img-wrapper');
         const img = card.querySelector('img.card-img');
         
@@ -813,7 +810,6 @@
             img.classList.add('loaded');
           };
           
-          // لو الصورة محملة مسبقاً (cache)
           if (img.complete && img.naturalWidth > 0) {
             onLoad();
           } else {
@@ -826,13 +822,9 @@
           }
         }
 
-        // ✅ Preload للصور الأخرى في الخلفية بعد ظهور أول 4
-        if (index >= 4 && index < 8) {
-          if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => preloadImage(item.image), { timeout: 2000 });
-          } else {
-            setTimeout(() => preloadImage(item.image), 100);
-          }
+        // ✅ preload فوري لكل الصور من الخامسة فما فوق
+        if (index >= 4) {
+          preloadImage(item.image);
         }
 
         card.addEventListener('mousemove', (e) => {
@@ -872,12 +864,10 @@
     }
 
     function openModal(item) {
-      // ✅ ابدأ shimmer
       modalImageWrap.classList.remove('is-loaded');
       modalImageWrap.classList.add('is-loading');
       modalImage.classList.remove('loaded');
 
-      // ✅ لو الصورة في الـ cache، اعرض فوراً
       const cached = imageCache.get(item.image);
       const finalSrc = cached ? cached.src : item.image;
 
@@ -898,7 +888,6 @@
       modalImage.src = finalSrc;
       modalImage.alt = item.title;
 
-      // لو الصورة محملة مسبقاً
       if (modalImage.complete && modalImage.naturalWidth > 0) {
         modalImageWrap.classList.remove('is-loading');
         modalImageWrap.classList.add('is-loaded');
@@ -941,7 +930,6 @@
       }
     });
 
-    // ✅ Debounce للبحث (يمنع re-render مع كل حرف)
     let searchTimeout;
     searchInput.addEventListener('input', (e) => {
       clearTimeout(searchTimeout);
@@ -955,7 +943,11 @@
       }, 250);
     });
 
-    renderCards(teamMembers);
+    try {
+      renderCards(teamMembers);
+    } catch (err) {
+      console.error('❌ فشل عرض البطاقات:', err);
+    }
   </script>
 </body>
 </html>
